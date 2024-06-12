@@ -1,0 +1,47 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  pipeline:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: set up a virtual machine in cloud environment
+        uses: actions/checkout@v4
+
+      - name: set up a GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: set up a Node.js environment on virtual machine
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: install all project dependancies
+        run: npm install
+
+      - name: compile or build a code to more optimized version
+        run: npm run build
+
+      - name: run unit tests / integration tests / E2E tests
+        run: npm run test
+
+      - name: take built files and create zipped artifacts from them
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "./build"
+
+      - name: deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
